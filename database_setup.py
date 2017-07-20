@@ -3,18 +3,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
-import sqlite3
 
 
-engine = create_engine('sqlite:///restaurantmenu.db', echo = True)
 Base = declarative_base()
-Base.metadata.create_all(engine)
 
 class Restaurant(Base):
 	__tablename__ = 'restaurant'
 
 	id = Column(Integer, primary_key = True)
 	name = Column(String(80), nullable = False)
+
+	@property
+	def serialize(self):
+		return {
+		'name' : self.name
+		}
 
 
 class MenuItem(Base):
@@ -26,4 +29,17 @@ class MenuItem(Base):
 	price = Column(String(10))
 	course = Column(String(15))
 	restaurant_id = Column(Integer, ForeignKey('restaurant.id'), nullable = False)
-	restaurant_id = relationship('Restaurant')
+	restaurant = relationship('Restaurant')
+
+	@property
+	def serialize(self):
+		return {
+		'name' : self.name,
+		'description' : self.description,
+		'course' : self.course,
+		'price' : self.price
+		}
+
+
+engine = create_engine('sqlite:///restaurantmenu.db', echo = True)
+Base.metadata.create_all(engine)
